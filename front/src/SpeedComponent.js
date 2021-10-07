@@ -4,7 +4,7 @@ import Slider from '@material-ui/core/Slider';
 import Tooltip from '@material-ui/core/Tooltip';
 
 
-const HOST = "http://humidity-extractor.local"
+const HOST = "humidity-extractor.local"
 const PORT = 21000
 
 const useStyles = makeStyles((theme) =>

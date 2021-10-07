@@ -3,7 +3,7 @@ Description=Humidity extractor
 After=network.target
 
 [Service]
-User=ubuntu
+User=pi
 WorkingDirectory=/home/pi/humidity-extractor
 ExecStart=/home/pi/humidity-extractor/main.py
 Restart=always
