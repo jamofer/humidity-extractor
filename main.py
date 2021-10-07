@@ -10,7 +10,7 @@ PORT = 21000
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resource={r"/*": {"origins": "*"}})
 configuration = humidity_extractor.load_configuration()
 humidity_extractor.start(configuration)
 
