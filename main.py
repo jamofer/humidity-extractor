@@ -6,6 +6,7 @@ from humidity_extractor import ExtractorSpeeds
 from flask_cors import CORS
 
 PASSWORD = "cW6sZ=7R?z=yGtXV"
+PORT = 21000
 
 
 app = Flask(__name__)
@@ -84,4 +85,4 @@ def _is_remote_ip_origin():
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=21000, debug=True)
+    app.run('0.0.0.0', port=PORT, debug=True)

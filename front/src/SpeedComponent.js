@@ -4,6 +4,9 @@ import Slider from '@material-ui/core/Slider';
 import Tooltip from '@material-ui/core/Tooltip';
 
 
+const HOST = "http://humidity-extractor.local"
+const PORT = 21000
+
 const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
@@ -12,14 +15,16 @@ const useStyles = makeStyles((theme) =>
   }),
 );
 
+const BASE_URL = `http://${HOST}:${PORT}`
+
 function getExtractorStatus() {
-  return fetch('http://192.168.1.100:8080/status')
+  return fetch(`${BASE_URL}/status`)
     .then(data => data.json())
 }
 
 const setExtractorSpeed = (speed) => {
   fetch(
-    'http://192.168.1.100:8080/configure', 
+    `${BASE_URL}/configure`,
     {
       method: 'POST', 
       'headers': { 'Content-Type': 'application/json'}, 
