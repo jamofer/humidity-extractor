@@ -3,10 +3,6 @@ import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
 import Tooltip from '@material-ui/core/Tooltip';
 
-
-const HOST = "humidity-extractor.local"
-const PORT = 21000
-
 const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
