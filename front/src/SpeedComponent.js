@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) =>
   }),
 );
 
-const BASE_URL = `http://${HOST}:${PORT}`
+const BASE_URL = "api"
 
 function getExtractorStatus() {
   return fetch(`${BASE_URL}/status`)
