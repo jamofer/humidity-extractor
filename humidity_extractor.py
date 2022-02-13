@@ -165,7 +165,10 @@ def load_configuration():
         return Configuration()
 
     with open(CONFIGURATION_FILE) as f:
-        json_configuration = json.loads(f.read())
+        try:
+            json_configuration = json.loads(f.read())
+        except:
+            return Configuration()
 
         if "product" not in json_configuration:
             json_configuration["product"] = "default"

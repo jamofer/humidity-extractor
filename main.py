@@ -52,7 +52,10 @@ def dock():
 
 @app.route("/api/configuration", methods=["GET"])
 def get_configuration():
-    return configuration.__dict__
+    return {
+        'velocity_ratio': configuration.velocity_ratio,
+        'product': configuration.product.NAME
+    }
 
 
 @app.route("/api/configure", methods=["POST"])
