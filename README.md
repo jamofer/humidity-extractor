@@ -47,14 +47,13 @@ It will open a web frontend in Raspberry PI at port 21000. It exposes an API res
 #### GET /api/configuration
 ```json
 {
-  "velicity_ratio":1.00,
+  "velicity_ratio": 1.00,
   "product": "default"
 }
 ```
 
 #### POST /api/configure
 ```json
-# Request body
 {
   "velocity_ratio": 0.54,
   "velocity_percentage": 66,

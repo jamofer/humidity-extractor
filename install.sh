@@ -37,11 +37,11 @@ WantedBy=multi-user.target\n
 EOF
 
 echo -n [ Bootstrap environment ...............................
-type npm || curl -sL https://deb.nodesource.com/setup_12.x | sudo bash - &&
-type npm || sudo apt install nodejs &&
-type npm || npm install --global yarn &&
+type npm 2>&1 > /dev/null || curl -sL https://deb.nodesource.com/setup_12.x | sudo bash - &&
+type npm 2>&1 > /dev/null || sudo apt install nodejs &&
+type npm 2>&1 > /dev/null || npm install --global yarn &&
 yarn --cwd front build > /dev/null 2>&1 &&
-type pip || sudo apt-get install python-pip > /dev/null &&
+type pip 2>&1 > /dev/null || sudo apt-get install python-pip > /dev/null &&
 sudo systemctl stop $SERVICE  > /dev/null &&
 mkdir -p $WORKSPACE/public  > /dev/null && ok || no
 echo -n [ Deploying frontend ..................................
@@ -52,5 +52,5 @@ echo -n [ Setup backend .......................................
 sudo echo -e $SERVICE_CONTENT /lib/systemd/system/$SERVICE > /dev/null &&
 sudo systemctl enable $SERVICE > /dev/null && ok || no
 echo -n [ Starting backend ....................................
-/home/pi/humidity-extractor/main.py -p $product &&
+$WORKSPACE/main.py -p $product &&
 sudo systemctl start $SERVICE > /dev/null && ok || no
