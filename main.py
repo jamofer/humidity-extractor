@@ -1,31 +1,40 @@
 #!/usr/bin/env python2
+import argparse
+import os
+import sys
 
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 import humidity_extractor
-from humidity_extractor import ExtractorSpeeds
+from humidity_extractor import EasyHomeHygroPremiumSP, Products
 from flask_cors import CORS
 
-PASSWORD = "cW6sZ=7R?z=yGtXV"
 PORT = 21000
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 CORS(app, resource={r"/*": {"origins": "*"}})
 configuration = humidity_extractor.load_configuration()
 humidity_extractor.start(configuration)
 
 
-@app.route("/status")
+@app.route('/', defaults={'path': 'index.html'})
+@app.route('/<path:path>')
+def web(path):
+    app.logger.info("PATH: {}".format(path))
+    return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public'), path)
+
+
+@app.route("/api/status")
 def status():
-    current_speed = ExtractorSpeeds.by_ratio(configuration.velocity_ratio)
+    current_speed = EasyHomeHygroPremiumSP.by_ratio(configuration.velocity_ratio)
 
     return {
-        'speeds': [speed.name for speed in ExtractorSpeeds.all()],
-        'available_speeds': [speed.name for speed in ExtractorSpeeds.available_speeds()],
+        'speeds': [speed.name for speed in EasyHomeHygroPremiumSP.all()],
+        'available_speeds': [speed.name for speed in EasyHomeHygroPremiumSP.available_speeds()],
         'current': {
             'speed': current_speed.name,
             'ratio': round(configuration.velocity_ratio, ndigits=2),
-            'real_ratio': round(ExtractorSpeeds.ratio_for(current_speed), ndigits=2)
+            'real_ratio': round(EasyHomeHygroPremiumSP.ratio_for(current_speed), ndigits=2)
         }
     }
 
@@ -37,34 +46,34 @@ def dock():
     POST /configure -> {"velocity_ratio": 0.0 - 1.0}</br>
     POST /configure -> {"velocity_percentage": 0 - 100}</br>
     POST /configure -> {"velocity": ("off" | "quiet" | "very low" | "normal" | "high" | "very high" | "maximum") }</br>
+    POST /configure -> {"product": ("default" | "EasyHome Hygro PremiumSP" | "Solid state relay EasyHome Hygro PremiumSP") }</br>
     '''
 
 
-@app.route("/configuration", methods=["GET"])
+@app.route("/api/configuration", methods=["GET"])
 def get_configuration():
     return configuration.__dict__
 
 
-@app.route("/configure", methods=["POST"])
+@app.route("/api/configure", methods=["POST"])
 def configure():
     request_json = request.get_json()
 
     if request_json is None:
         return '', 400
 
-    if _is_remote_ip_origin():
-        if 'pswd' not in request_json or request_json['pswd'] != PASSWORD:
-            return '', 403
-
     if 'velocity_percentage' in request_json:
         request_json['velocity_ratio'] = request_json['velocity_percentage'] / 100.0
 
     if 'velocity' in request_json:
-        speed = ExtractorSpeeds.by_name(request_json['velocity'])
-        request_json['velocity_ratio'] = ExtractorSpeeds.ratio_for(speed)
+        speed = EasyHomeHygroPremiumSP.by_name(request_json['velocity'])
+        request_json['velocity_ratio'] = EasyHomeHygroPremiumSP.ratio_for(speed)
+
+    if 'product' in request_json:
+        configuration.product = Products.by_name(request_json['product']) or Products.Default
 
     if 'velocity_ratio' not in request_json:
-        return '', 400
+        return '', 200
 
     velocity_ratio = request_json['velocity_ratio']
     if velocity_ratio > 1:
@@ -80,9 +89,15 @@ def configure():
     return "", 200
 
 
-def _is_remote_ip_origin():
-    return not request.remote_addr.startswith('192') and not request.remote_addr.startswith('127')
-
+argument_parser = argparse.ArgumentParser()
+argument_parser.add_argument('--product', '-p', dest='product', choices=['default', 'solid state'])
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=PORT, debug=True)
+    arguments = argument_parser.parse_args()
+
+    if arguments.product:
+        configuration = humidity_extractor.load_configuration()
+        configuration.product = Products.by_name(arguments.product) or Products.Default
+        sys.exit(0)
+
+    app.run('0.0.0.0', port=PORT)

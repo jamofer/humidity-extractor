@@ -1,7 +1,11 @@
 import json
 import os
 
-from RPi import GPIO
+try:
+    from RPi import GPIO
+except:
+    import mock
+    GPIO = mock.MagicMock()
 
 
 CONFIGURATION_FILE = os.path.expanduser("~/.humidity_extractor.json")
@@ -17,7 +21,9 @@ class Speed:
         return 'Velocity({name}, {pin}, toggle_pin={toggle})'.format(name=self.name, pin=self.pin, toggle=self.toggle_pin)
 
 
-class ExtractorSpeeds(object):
+class EasyHomeHygroPremiumSP(object):
+    NAME = "EasyHome Hygro PremiumSP"
+
     Velocity1 = Speed('quiet', pin=2)
     Velocity2 = Speed('very_slow', pin=3, toggle_pin=True)
     Velocity3 = Speed('slow', pin=4, toggle_pin=True)
@@ -25,12 +31,12 @@ class ExtractorSpeeds(object):
     Velocity5 = Speed('fast', pin=15, toggle_pin=True)
     Velocity6 = Speed('very_fast', pin=17, toggle_pin=True)
     Velocity7 = Speed('maximum', pin=18, toggle_pin=True)
-    SpeedOff = Speed("off", pin=None)
+    Off = Speed("off", pin=None)
 
     @classmethod
     def all(cls):
         return [
-            cls.SpeedOff,
+            cls.Off,
             cls.Velocity1,
             cls.Velocity2,
             cls.Velocity3,
@@ -60,22 +66,46 @@ class ExtractorSpeeds(object):
 
     @classmethod
     def by_name(cls, name):
-        for speed in cls.all() + [cls.SpeedOff]:
+        for speed in cls.all() + [cls.Off]:
             if name == speed.name:
                 return speed
 
         return None
 
 
+class SolidStateRelaysEasyHomeHygroPremiumSP(EasyHomeHygroPremiumSP):
+    NAME = "Solid state relay EasyHome Hygro PremiumSP"
+
+    Velocity1 = Speed('quiet', pin=2, toggle_pin=True)
+
+
+class Products:
+    Default = EasyHomeHygroPremiumSP
+    EasyHomeHygroPremiumSP = EasyHomeHygroPremiumSP
+    SolidStateRelaysEasyHomeHygroPremiumSP = SolidStateRelaysEasyHomeHygroPremiumSP
+
+    @classmethod
+    def by_name(cls, name):
+        if EasyHomeHygroPremiumSP.NAME.lower().startswith(name):
+            return EasyHomeHygroPremiumSP
+
+        if SolidStateRelaysEasyHomeHygroPremiumSP.NAME.lower().startswith(name):
+            return SolidStateRelaysEasyHomeHygroPremiumSP
+
+        if name == "default":
+            return cls.Default
+
+
 class Configuration(object):
-    def __init__(self, velocity_ratio=0.1):
+    def __init__(self, velocity_ratio=0.1, product=EasyHomeHygroPremiumSP):
         self.velocity_ratio = velocity_ratio
+        self.product = product
 
 
 def start(configuration):
     GPIO.setmode(GPIO.BCM)
 
-    for velocity in ExtractorSpeeds.available_speeds():
+    for velocity in configuration.product.available_speeds():
         _initialize_velocity_pin(velocity)
 
     set_velocity(configuration.velocity_ratio)
@@ -86,8 +116,9 @@ def set_velocity(ratio):
         turn_off()
         return
 
-    velocity_target = ExtractorSpeeds.by_ratio(ratio)
-    rest_of_velocities = set(ExtractorSpeeds.available_speeds()) - {velocity_target}
+    configuration = load_configuration()
+    velocity_target = configuration.product.by_ratio(ratio)
+    rest_of_velocities = set(configuration.product.available_speeds()) - {velocity_target}
 
     reset_velocities(rest_of_velocities)
 
@@ -95,7 +126,8 @@ def set_velocity(ratio):
 
 
 def turn_off():
-    reset_velocities(ExtractorSpeeds.available_speeds())
+    configuration = load_configuration()
+    reset_velocities(configuration.product.available_speeds())
 
 
 def reset_velocities(rest_of_velocities):
@@ -104,14 +136,17 @@ def reset_velocities(rest_of_velocities):
 
 
 def _initialize_velocity_pin(velocity):
-    if velocity is ExtractorSpeeds.SpeedOff:
+    configuration = load_configuration()
+    if velocity is configuration.product.Off:
         return
 
     GPIO.setup(velocity.pin, GPIO.OUT, initial=_velocity_pin_value(velocity, enabled=False))
 
 
 def _set_velocity_pin(velocity, enabled):
-    if velocity is ExtractorSpeeds.SpeedOff:
+    configuration = load_configuration()
+
+    if velocity is configuration.product.Off:
         return
 
     gpio_value = _velocity_pin_value(velocity, enabled)
@@ -131,7 +166,14 @@ def load_configuration():
 
     with open(CONFIGURATION_FILE) as f:
         json_configuration = json.loads(f.read())
-        return Configuration(json_configuration["velocity_ratio"])
+
+        if "product" not in json_configuration:
+            json_configuration["product"] = "default"
+
+        return Configuration(
+            json_configuration["velocity_ratio"],
+            Products.by_name(json_configuration["product"])
+        )
 
 
 def save_configuration(configuration):
