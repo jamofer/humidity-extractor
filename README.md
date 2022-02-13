@@ -34,10 +34,10 @@ It will open a web frontend in Raspberry PI at port 21000. It exposes an API res
 #### GET /api/status
 ```json
 {
-"speeds": ["speed1", "speed2", "speed3"],
-"available_speeds": ["speed1", "speed2"],
+"speeds": ["quiet", "normal", "maximum"],
+"available_speeds": ["quiet", "maximum"],
 "current": {
-    "speed": "speed3",
+    "speed": "maximum",
     "ratio": 1.00,
     "real_ratio": 1.00
   }
@@ -56,10 +56,10 @@ It will open a web frontend in Raspberry PI at port 21000. It exposes an API res
 ```json
 # Request body
 {
-  "velocity_ratio": float, [0.00, 1] optional
-  "velocity_percentage": int, [0, 100] optional
-  "velocity": ["off" | "quiet" | "very low" | "normal" | "high" | "very high" | "maximum"] optional
-  "product": ["default" | "solid state"] optional
+  "velocity_ratio": 0.54,
+  "velocity_percentage": 66,
+  "velocity": "quiet",
+  "product": "default"
 }
 ```
 
