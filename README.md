@@ -1,6 +1,6 @@
 # EasyHome Hygro Premium SP controller
 
-It allows to choose the humidity extractor speed via web page.
+Unofficial speed controller for EasyHome Hygro Premium SP via web.
 
 ## Requirements
 * Raspberry PI
