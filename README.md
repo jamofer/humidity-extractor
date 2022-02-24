@@ -1,11 +1,13 @@
 # EasyHome Hygro Premium SP controller
 
-Unofficial speed controller for EasyHome Hygro Premium SP via web.
+Unofficial speed controller for EasyHome Hygro Premium SP via web. It exposes an API REST server with a simple
+frontend in order to control the current speed.
 
 ## Requirements
 * Raspberry PI
 * Up to 7 relays
-* Software: pip, node, yarn
+* Software: pip
+* Development Software: pip, node, yarn
 
 ## Setup
 We need to interface our Raspberry PI to the EasyHome Hygro card through relays.
@@ -23,11 +25,12 @@ normal relays use the solid state configuration.
 ![](EasyHome%20Hygro%20PremiumSP%20Solid%20State%20Relay.png)
 ## Installation
 ```shell
-git clone https://github.com/jamofer/humidity-extractor.git
-cd humidity-extractor
-./install.sh # ./install PRODUCT [default | solid state]
+sudo pip install hygro
 ```
 ## Web server
+Run the command `hygro-premium-sp-server`.
+If do you prefer to have it in a background process you can run as `nohup hygro-premium-sp-server &`
+
 It will open a web frontend in Raspberry PI at port 21000. It exposes an API rest too in the same port.
 
 ### API REST
