@@ -8,7 +8,7 @@ on:
     types: [created]
 
 jobs:
-  build-frontend:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -21,11 +21,6 @@ jobs:
         yarn --cwd front install
         yarn --cwd front build
         cp -r front/build src/hygro_premium_sp/public
-
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
