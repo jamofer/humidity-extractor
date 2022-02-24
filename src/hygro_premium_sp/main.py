@@ -1,11 +1,10 @@
 #!/usr/bin/env python2
 import argparse
 import os
-import sys
 
 from flask import Flask, request, send_from_directory
-import humidity_extractor
-from humidity_extractor import EasyHomeHygroPremiumSP, Products
+from hygro_premium_sp import humidity_extractor
+from hygro_premium_sp.humidity_extractor import EasyHomeHygroPremiumSP, Products
 from flask_cors import CORS
 
 PORT = 21000
@@ -14,7 +13,6 @@ PORT = 21000
 app = Flask(__name__, static_folder=None)
 CORS(app, resource={r"/*": {"origins": "*"}})
 configuration = humidity_extractor.load_configuration()
-humidity_extractor.start(configuration)
 
 
 @app.route('/', defaults={'path': 'index.html'})
@@ -86,8 +84,8 @@ def configure():
         velocity_ratio = 0
 
     configuration.velocity_ratio = velocity_ratio
-    humidity_extractor.save_configuration(configuration)
     humidity_extractor.set_velocity(velocity_ratio)
+    humidity_extractor.save_configuration(configuration)
 
     return "", 200
 
@@ -95,12 +93,18 @@ def configure():
 argument_parser = argparse.ArgumentParser()
 argument_parser.add_argument('--product', '-p', dest='product', choices=['default', 'solid state'])
 
-if __name__ == '__main__':
+
+def main():
     arguments = argument_parser.parse_args()
 
     if arguments.product:
-        configuration = humidity_extractor.load_configuration()
         configuration.product = Products.by_name(arguments.product) or Products.Default
-        sys.exit(0)
+        humidity_extractor.save_configuration(configuration)
 
+    print(configuration)
+    humidity_extractor.start(configuration)
     app.run('0.0.0.0', port=PORT)
+
+
+if __name__ == '__main__':
+    main()

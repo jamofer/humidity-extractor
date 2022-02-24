@@ -5,8 +5,8 @@ import fake_rpigpio.utils
 fake_rpigpio.utils.install()
 
 from RPi import GPIO
-import humidity_extractor
-from humidity_extractor import EasyHomeHygroPremiumSP, Configuration, Products
+from hygro_premium_sp import humidity_extractor
+from hygro_premium_sp.humidity_extractor import EasyHomeHygroPremiumSP, Configuration, Products
 
 
 class TestHumidityExtractor(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestHumidityExtractor(unittest.TestCase):
         setup = patch('RPi.GPIO.setup').start()
         output = patch('RPi.GPIO.output').start()
         conf = Configuration(velocity_ratio=0.1)
-        patch('humidity_extractor.load_configuration').start().return_value = conf
+        patch('hygro_premium_sp.humidity_extractor.load_configuration').start().return_value = conf
 
         humidity_extractor.start(conf)
 
@@ -48,7 +48,7 @@ class TestHumidityExtractor(unittest.TestCase):
         setup = patch('RPi.GPIO.setup').start()
         output = patch('RPi.GPIO.output').start()
         conf = Configuration(velocity_ratio=0.1, product=Products.SolidStateRelaysEasyHomeHygroPremiumSP)
-        patch('humidity_extractor.load_configuration').start().return_value = conf
+        patch('hygro_premium_sp.humidity_extractor.load_configuration').start().return_value = conf
 
         humidity_extractor.start(conf)
 

@@ -1,12 +1,3 @@
-from setuptools import setup
+import setuptools
 
-setup(
-    name='humidity-extractor',
-    version='',
-    packages=[''],
-    url='',
-    license='',
-    author='Javier Moragon',
-    author_email='',
-    description=''
-)
+setuptools.setup(setup_requires='setuptools>=40')

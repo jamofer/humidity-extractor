@@ -1,4 +1,7 @@
 .idea
 venv*
 *.pyc
-
+dist
+build
+src/hygro_premium_sp/public
+*.egg-info

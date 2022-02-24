@@ -86,6 +86,8 @@ class Products:
 
     @classmethod
     def by_name(cls, name):
+        name = name.lower()
+
         if EasyHomeHygroPremiumSP.NAME.lower().startswith(name):
             return EasyHomeHygroPremiumSP
 
@@ -100,6 +102,12 @@ class Configuration(object):
     def __init__(self, velocity_ratio=0.1, product=EasyHomeHygroPremiumSP):
         self.velocity_ratio = velocity_ratio
         self.product = product
+
+    def to_dict(self):
+        return {
+            'velocity_ratio': self.velocity_ratio,
+            'product': self.product.NAME
+        }
 
 
 def start(configuration):
@@ -181,5 +189,5 @@ def load_configuration():
 
 def save_configuration(configuration):
     with open(CONFIGURATION_FILE, 'w') as f:
-        json_configuration = json.dumps(configuration.__dict__)
+        json_configuration = json.dumps(configuration.to_dict())
         return f.write(json_configuration)
