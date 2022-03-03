@@ -25,7 +25,7 @@ normal relays use the solid state configuration.
 ![](EasyHome%20Hygro%20PremiumSP%20Solid%20State%20Relay.png)
 ## Installation
 ```shell
-sudo pip install hygro
+sudo pip install hygro-premium-sp-server
 ```
 ## Web server
 Run the command `hygro-premium-sp-server`.
